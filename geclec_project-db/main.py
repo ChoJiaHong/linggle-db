@@ -12,7 +12,7 @@ from database import Repository
 configure_tracing("dictionary-service")
 
 app = FastAPI(root_path="/db")
-FastAPIInstrumentor.instrument_app(app)
+FastAPIInstrumentor.instrument_app(app, excluded_urls="healthz")
 
 
 app.add_middleware(
