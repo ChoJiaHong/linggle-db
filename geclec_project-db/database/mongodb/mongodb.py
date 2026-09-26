@@ -1,11 +1,14 @@
-from pymongo import MongoClient
-import initMongodb
-collection=initMongodb.collection
-hintWord="ablaze with"
-print(list(collection.find({"ngram": {"$regex":hintWord}},{"_id":0,"term":0})))
+import re
 
-def findTerm(hintWord):
-    return list(collection.find({"term":hintWord},{"_id":0,"term":0}))
-def findPattern(hintWord,words):
-    return list(collection.find({"term":words[0],"pattern": {"$regex":hintWord}},{"_id":0,"term":0}))
-findPattern(hintWord,"ablaze")
+import initMongodb
+
+collection = initMongodb.collection
+
+
+def findTerm(term):
+    return list(collection.find({"term": term.lower()}, {"_id": 0, "term": 0}))
+
+
+def findByPrefix(prefix, limit=20):
+    pattern = f"^{re.escape(prefix.lower())}"
+    return list(collection.find({"term": {"$regex": pattern}}, {"_id": 0}).limit(limit))

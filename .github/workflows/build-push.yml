@@ -1,0 +1,26 @@
+name: Build and push image
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          # tag 用完整 git commit SHA，不是手動編號的時間戳——任何一個
+          # image 都能反查回是哪一次 commit build 出來的。
+          tags: hiro08081/linggle-db:${{ github.sha }}
+          cache-from: type=registry,ref=hiro08081/linggle-db:buildcache
+          cache-to: type=registry,ref=hiro08081/linggle-db:buildcache,mode=max

@@ -1,22 +1,23 @@
 import os, sys
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-import main_config
-from dynamodb import dynamo
 from mongodb import mongodb
-
-database = main_config.database
+from cache import redis_cache
 
 
 def getWithTerm(hintWord):
-    if database == "mongodb":
-        return mongodb.findTerm(hintWord=hintWord)
-    elif database == "dynamodb":
-        return dynamo.queryTerm(hintWord=hintWord)
+    cached = redis_cache.getTerm(hintWord)
+    if cached is not None:
+        return cached
+    result = mongodb.findTerm(hintWord)
+    redis_cache.setTerm(hintWord, result)
+    return result
 
 
-def getWithPattern(hintWord, words):
-    if database == "mongodb":
-        return mongodb.findPattern(hintWord=hintWord, words=words)
-    elif database == "dynamodb":
-        return dynamo.queryPattern(hintWord=hintWord, words=words)
+def getWithPrefix(hintWord):
+    cached = redis_cache.getPrefix(hintWord)
+    if cached is not None:
+        return cached
+    result = mongodb.findByPrefix(hintWord)
+    redis_cache.setPrefix(hintWord, result)
+    return result

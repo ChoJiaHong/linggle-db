@@ -1,6 +1,19 @@
 fastapi==0.79.0
 uvicorn==0.18.2
 pydantic==1.10.2
-boto3==1.25.1
 pymongo
+redis
+
+# Distributed tracing：span 直接用 OTLP gRPC 送給 Tempo，見 tracing_config.py。
+# 版本組合已在乾淨的 python:3.8 容器裡（跟 Dockerfile 的 base image 版本
+# 一致）對著 fastapi==0.79.0/pydantic==1.10.2 驗證過相容——第一次挑版本時
+# 在 python:3.10 容器裡測，pip 解出來的版本對 3.8 完全裝不了
+# （opentelemetry-api 1.44.0 需要 Python >=3.10），實際 build image 時才
+# 發現，這裡改成對著正確的 Python 版本重驗證過（跟 linggle-ml 同一批
+# 驗證，只是這裡不需要 celery 那個 instrumentation 套件——dictionary-service
+# 沒有用到 Celery）。
+opentelemetry-api==1.33.1
+opentelemetry-sdk==1.33.1
+opentelemetry-exporter-otlp-proto-grpc==1.33.1
+opentelemetry-instrumentation-fastapi==0.54b1
 
